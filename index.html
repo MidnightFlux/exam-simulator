@@ -1151,6 +1151,48 @@
             `;
             container.appendChild(div);
         }
+
+        // Load default question file on page load
+        async function loadDefaultFile() {
+            try {
+                const response = await fetch('sample-questions/ai-102-full.json');
+                if (!response.ok) {
+                    throw new Error('Failed to load default file');
+                }
+                
+                const questions = await response.json();
+                
+                if (!Array.isArray(questions) || questions.length === 0) {
+                    throw new Error('Invalid question file: no questions found');
+                }
+                
+                // Validate question structure
+                const valid = questions.every(q => 
+                    q.question_number && 
+                    q.question_text && 
+                    Array.isArray(q.options) && 
+                    Array.isArray(q.correct_answers)
+                );
+                
+                if (!valid) {
+                    throw new Error('Invalid question format: missing required fields');
+                }
+                
+                uploadedFileData = {
+                    file: { name: 'ai-102-full.json' },
+                    questions: questions,
+                    totalCount: questions.length
+                };
+                
+                showConfigSection();
+            } catch (err) {
+                console.log('Could not load default file:', err.message);
+                // Silently fail - user can still upload manually
+            }
+        }
+
+        // Initialize on page load
+        loadDefaultFile();
     </script>
 </body>
 </html>
