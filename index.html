@@ -1301,6 +1301,44 @@
             });
         }
 
+        // Auto-load default question file on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('sample-questions/ai-102-full.json');
+                if (!response.ok) {
+                    throw new Error('Failed to load default questions');
+                }
+                const questions = await response.json();
+                
+                if (!Array.isArray(questions) || questions.length === 0) {
+                    throw new Error('Invalid question file: no questions found');
+                }
+                
+                // Validate question structure
+                const valid = questions.every(q => 
+                    q.question_number && 
+                    q.question_text && 
+                    Array.isArray(q.options) && 
+                    Array.isArray(q.correct_answers)
+                );
+                
+                if (!valid) {
+                    throw new Error('Invalid question format: missing required fields');
+                }
+                
+                uploadedFileData = {
+                    file: { name: 'ai-102-full.json' },
+                    questions: questions,
+                    totalCount: questions.length
+                };
+                
+                showConfigSection();
+            } catch (err) {
+                console.log('Auto-load failed:', err.message);
+                // Silently fail - user can still upload manually
+            }
+        });
+
         function showReviewDetail(q, result, userAnswer, displayNumber) {
             const container = document.getElementById('review-details');
             
