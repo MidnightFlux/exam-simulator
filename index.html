@@ -300,6 +300,73 @@
             height: 20px;
         }
 
+        .category-section {
+            margin-bottom: 25px;
+        }
+
+        .category-section h4 {
+            margin-bottom: 12px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .category-select-all {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+            font-weight: 500;
+            color: #667eea;
+        }
+
+        .category-select-all input {
+            width: 20px;
+            height: 20px;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f8f9ff;
+            border-radius: 8px;
+        }
+
+        .category-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .category-item:hover {
+            background: #e8eaf6;
+        }
+
+        .category-item input {
+            width: 18px;
+            height: 18px;
+        }
+
+        .category-item label {
+            cursor: pointer;
+            font-size: 0.95rem;
+            flex: 1;
+        }
+
+        .category-count {
+            color: #666;
+            font-size: 0.85rem;
+        }
 
         .number-input {
             width: 100%;
@@ -482,6 +549,7 @@
                     <p class="filename">📄 <span id="config-filename"></span></p>
                     <p style="color: #666; font-size: 0.9rem;">
                         Total questions available: <span id="total-questions" style="font-weight: 600; color: #333;">0</span>
+                        | Categories: <span id="total-categories" style="font-weight: 600; color: #333;">0</span>
                     </p>
                 </div>
                 
@@ -491,7 +559,7 @@
                     </label>
                     <input type="number" id="question-count" class="number-input" min="1" value="10">
                     <p style="color: #666; font-size: 0.85rem; margin-top: 8px;" id="question-count-help">
-                        Enter a number between 1 and the total questions
+                        Enter a number between 1 and the selected categories
                     </p>
                 </div>
                 
@@ -504,6 +572,17 @@
                     <input type="checkbox" id="shuffle-options-checkbox">
                     <span>Shuffle answer options randomly</span>
                 </label>
+                
+                <div class="category-section">
+                    <h4>📂 Select Question Categories:</h4>
+                    <div class="category-select-all">
+                        <input type="checkbox" id="select-all-categories" checked>
+                        <label for="select-all-categories" style="cursor: pointer;">Select All / Deselect All</label>
+                    </div>
+                    <div class="category-grid" id="category-grid">
+                        <!-- Categories will be populated here -->
+                    </div>
+                </div>
                 
                 <div style="display: flex; gap: 10px;">
                     <button class="btn btn-secondary" onclick="resetFile()" style="flex: 1;">
@@ -521,7 +600,10 @@
         <!-- Exam Screen -->
         <div id="exam-screen" class="hidden">
             <div class="card">
-
+                <div id="selected-categories-display" style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e0e0e0;">
+                    <span style="color: #666; font-size: 0.9rem;">Categories: </span>
+                    <span id="selected-categories-list" style="font-weight: 500; color: #667eea;"></span>
+                </div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="progress-fill"></div>
                 </div>
@@ -718,6 +800,8 @@
         let examSession = null;
         let uploadedFileData = null;
         let selectedAnswers = [];
+        let categoryCountsData = {};
+        let selectedCategoriesList = [];
 
         // DOM Elements
         const fileUpload = document.getElementById('file-upload');
@@ -800,25 +884,86 @@
             document.getElementById('config-filename').textContent = uploadedFileData.file.name;
             document.getElementById('total-questions').textContent = uploadedFileData.totalCount;
             
-            // Set max question count
+            // Populate categories first to get the count
+            const categories = populateCategories();
+            document.getElementById('total-categories').textContent = categories.length;
+            
+            // updateQuestionCountMax() in populateCategories() will set the default value
+        }
+
+        function populateCategories() {
+            const questions = uploadedFileData.questions;
+            
+            // Extract unique categories and count questions per category
+            categoryCountsData = {};
+            questions.forEach(q => {
+                const cat = q.category || 'Uncategorized';
+                categoryCountsData[cat] = (categoryCountsData[cat] || 0) + 1;
+            });
+            
+            const categories = Object.keys(categoryCountsData).sort();
+            const categoryGrid = document.getElementById('category-grid');
+            categoryGrid.innerHTML = '';
+            
+            categories.forEach(cat => {
+                const div = document.createElement('div');
+                div.className = 'category-item';
+                div.innerHTML = `
+                    <input type="checkbox" id="cat-${encodeURIComponent(cat)}" value="${cat}" checked>
+                    <label for="cat-${encodeURIComponent(cat)}">${cat}</label>
+                    <span class="category-count">(${categoryCountsData[cat]})</span>
+                `;
+                categoryGrid.appendChild(div);
+            });
+            
+            // Handle select all/deselect all
+            const selectAllCheckbox = document.getElementById('select-all-categories');
+            selectAllCheckbox.addEventListener('change', (e) => {
+                const checkboxes = categoryGrid.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(cb => cb.checked = e.target.checked);
+                updateQuestionCountMax();
+            });
+            
+            // Add change listeners to all category checkboxes
+            const checkboxes = categoryGrid.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', updateQuestionCountMax);
+            });
+            
+            // Initial max calculation
             updateQuestionCountMax();
+            
+            return categories;
+        }
+
+        function getSelectedCategoryTotal() {
+            const selectedCategories = Array.from(
+                document.querySelectorAll('#category-grid input[type="checkbox"]:checked')
+            ).map(cb => cb.value);
+            
+            let totalSelected = 0;
+            selectedCategories.forEach(cat => {
+                totalSelected += categoryCountsData[cat] || 0;
+            });
+            
+            return totalSelected;
         }
 
         function updateQuestionCountMax() {
-            const totalQuestions = uploadedFileData ? uploadedFileData.totalCount : 0;
+            const totalSelected = getSelectedCategoryTotal();
             
             const countInput = document.getElementById('question-count');
             const helpText = document.getElementById('question-count-help');
             
-            countInput.max = totalQuestions;
+            countInput.max = totalSelected;
             
-            // Default to total number of questions
-            if (totalQuestions > 0) {
-                countInput.value = totalQuestions;
+            // Default to total number of questions from selected categories
+            if (totalSelected > 0) {
+                countInput.value = totalSelected;
             }
             
             // Update help text
-            helpText.textContent = `Enter a number between 1 and ${totalQuestions}`;
+            helpText.textContent = `Enter a number between 1 and ${totalSelected} (selected categories)`;
         }
 
         function resetFile() {
@@ -855,11 +1000,28 @@
                 return;
             }
             
-            // Get all questions
-            let questions = [...uploadedFileData.questions];
+            // Get selected categories
+            const categoryCheckboxes = document.querySelectorAll('#category-grid input[type="checkbox"]:checked');
+            const selectedCategories = Array.from(categoryCheckboxes).map(cb => cb.value);
+            
+            if (selectedCategories.length === 0) {
+                showError('Please select at least one category');
+                return;
+            }
+            
+            // Filter questions by selected categories
+            let questions = uploadedFileData.questions.filter(q => {
+                const cat = q.category || 'Uncategorized';
+                return selectedCategories.includes(cat);
+            });
+            
+            if (questions.length === 0) {
+                showError('No questions found in the selected categories');
+                return;
+            }
             
             if (questionCount > questions.length) {
-                showError(`Cannot select more than ${questions.length} questions`);
+                showError(`Cannot select more than ${questions.length} questions from the selected categories`);
                 return;
             }
             
@@ -868,6 +1030,7 @@
             
             // Shuffle questions if needed
             if (shuffle) {
+                questions = [...questions];
                 for (let i = questions.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [questions[i], questions[j]] = [questions[j], questions[i]];
@@ -878,13 +1041,28 @@
                 questions = questions.slice(0, questionCount);
             }
             
+            // Store selected categories for display
+            selectedCategoriesList = selectedCategories;
+            
             // Create exam session
             examSession = new ExamSession(questions, false, shuffleOptions);
             
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('exam-screen').classList.remove('hidden');
             
+            renderSelectedCategories();
             renderQuestion();
+        }
+
+        function renderSelectedCategories() {
+            const display = document.getElementById('selected-categories-list');
+            if (selectedCategoriesList.length > 0) {
+                display.innerHTML = '<ul style="margin: 8px 0 0 0; padding-left: 20px; color: #667eea;">' +
+                    selectedCategoriesList.map(cat => `<li style="margin-bottom: 4px;">${cat}</li>`).join('') +
+                    '</ul>';
+            } else {
+                display.textContent = 'All';
+            }
         }
 
         function renderQuestion() {
@@ -1151,48 +1329,6 @@
             `;
             container.appendChild(div);
         }
-
-        // Load default question file on page load
-        async function loadDefaultFile() {
-            try {
-                const response = await fetch('sample-questions/ai-102-full.json');
-                if (!response.ok) {
-                    throw new Error('Failed to load default file');
-                }
-                
-                const questions = await response.json();
-                
-                if (!Array.isArray(questions) || questions.length === 0) {
-                    throw new Error('Invalid question file: no questions found');
-                }
-                
-                // Validate question structure
-                const valid = questions.every(q => 
-                    q.question_number && 
-                    q.question_text && 
-                    Array.isArray(q.options) && 
-                    Array.isArray(q.correct_answers)
-                );
-                
-                if (!valid) {
-                    throw new Error('Invalid question format: missing required fields');
-                }
-                
-                uploadedFileData = {
-                    file: { name: 'ai-102-full.json' },
-                    questions: questions,
-                    totalCount: questions.length
-                };
-                
-                showConfigSection();
-            } catch (err) {
-                console.log('Could not load default file:', err.message);
-                // Silently fail - user can still upload manually
-            }
-        }
-
-        // Initialize on page load
-        loadDefaultFile();
     </script>
 </body>
 </html>
