@@ -6,6 +6,7 @@
     <title>Exam Simulator - Client Side</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
     <style>
+        /* ==================== Base Styles ==================== */
         * {
             margin: 0;
             padding: 0;
@@ -19,11 +20,21 @@
             padding: 20px;
         }
 
+        /* ==================== Layout ==================== */
         .container {
             max-width: 900px;
             margin: 0 auto;
         }
 
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        /* ==================== Header ==================== */
         .header {
             text-align: center;
             color: white;
@@ -39,14 +50,7 @@
             opacity: 0.9;
         }
 
-        .card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            padding: 30px;
-            margin-bottom: 20px;
-        }
-
+        /* ==================== Progress Bar ==================== */
         .progress-bar {
             width: 100%;
             height: 8px;
@@ -69,6 +73,7 @@
             font-size: 0.9rem;
         }
 
+        /* ==================== Question Display ==================== */
         .question-number {
             color: #667eea;
             font-weight: 600;
@@ -98,6 +103,7 @@
             word-wrap: break-word;
         }
 
+        /* ==================== Options ==================== */
         .options {
             display: flex;
             flex-direction: column;
@@ -171,6 +177,7 @@
             word-break: break-word;
         }
 
+        /* ==================== Buttons ==================== */
         .btn {
             padding: 12px 30px;
             border: none;
@@ -209,6 +216,7 @@
             background: #45a049;
         }
 
+        /* ==================== Navigation ==================== */
         .navigation {
             display: flex;
             justify-content: space-between;
@@ -220,6 +228,7 @@
             margin-right: 0;
         }
 
+        /* ==================== Feedback & Explanation ==================== */
         .result-feedback {
             padding: 20px;
             border-radius: 10px;
@@ -276,6 +285,7 @@
             text-decoration: underline;
         }
 
+        /* ==================== File Upload ==================== */
         .file-input {
             width: 100%;
             padding: 40px;
@@ -297,6 +307,7 @@
             background: #e8eaf6;
         }
 
+        /* ==================== Form Elements ==================== */
         .checkbox-label {
             display: flex;
             align-items: center;
@@ -310,6 +321,21 @@
             height: 20px;
         }
 
+        .number-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .number-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* ==================== Categories ==================== */
         .category-section {
             margin-bottom: 25px;
         }
@@ -378,20 +404,7 @@
             font-size: 0.85rem;
         }
 
-        .number-input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1rem;
-            margin-bottom: 20px;
-        }
-
-        .number-input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
+        /* ==================== Config Info ==================== */
         .config-info {
             background: #f8f9ff;
             padding: 20px;
@@ -408,6 +421,7 @@
             font-weight: 600;
         }
 
+        /* ==================== Summary Stats ==================== */
         .summary-stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -434,6 +448,7 @@
             margin-top: 5px;
         }
 
+        /* ==================== Pass/Fail Status ==================== */
         .pass-status {
             text-align: center;
             padding: 30px;
@@ -456,6 +471,7 @@
             margin-bottom: 10px;
         }
 
+        /* ==================== Question Navigator ==================== */
         .question-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
@@ -472,31 +488,12 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
+            position: relative;
         }
 
         .question-dot.unanswered {
             background: #e0e0e0;
             color: #666;
-        }
-
-        .question-dot {
-            position: relative;
-        }
-
-        .question-dot .pin-icon {
-            position: absolute;
-            top: -4px;
-            right: -4px;
-            font-size: 10px;
-            background: #ff9800;
-            color: white;
-            border-radius: 50%;
-            width: 14px;
-            height: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
 
         .question-dot.correct {
@@ -517,6 +514,23 @@
             transform: scale(1.1);
         }
 
+        .question-dot .pin-icon {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            font-size: 10px;
+            background: #ff9800;
+            color: white;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        /* ==================== Error Messages ==================== */
         .error-message {
             color: #f44336;
             margin-top: 15px;
@@ -526,6 +540,7 @@
             border-radius: 8px;
         }
 
+        /* ==================== Utility Classes ==================== */
         .hidden {
             display: none !important;
         }
@@ -548,6 +563,7 @@
             padding: 4px 8px;
         }
 
+        /* ==================== Responsive ==================== */
         @media (max-width: 600px) {
             .header h1 {
                 font-size: 1.8rem;
@@ -575,12 +591,13 @@
 </head>
 <body>
     <div class="container">
+        <!-- ==================== Header ==================== -->
         <div class="header">
             <h1>📚 Exam Simulator</h1>
             <p>Client-Side Version - Runs entirely in your browser</p>
         </div>
         
-        <!-- Start Screen -->
+        <!-- ==================== Start Screen ==================== -->
         <div id="start-screen" class="card">
             <h2 style="margin-bottom: 20px;">Start New Exam</h2>
             
@@ -645,7 +662,7 @@
             <div id="error-message" class="hidden"></div>
         </div>
         
-        <!-- Exam Screen -->
+        <!-- ==================== Exam Screen ==================== -->
         <div id="exam-screen" class="hidden">
             <div class="card">
                 <div id="selected-categories-display" style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e0e0e0;">
@@ -695,7 +712,7 @@
             </div>
         </div>
         
-        <!-- Summary Screen -->
+        <!-- ==================== Summary Screen ==================== -->
         <div id="summary-screen" class="hidden">
             <div class="card">
                 <div id="pass-status" class="pass-status"></div>
@@ -735,10 +752,10 @@
     </div>
 
     <script>
-        // Exam Session Class - Manages exam state
+        // ==================== Exam Session Class ====================
         class ExamSession {
             constructor(questions, shuffle = false, shuffleOptions = false) {
-                this.originalQuestions = JSON.parse(JSON.stringify(questions)); // Deep copy
+                this.originalQuestions = JSON.parse(JSON.stringify(questions));
                 this.questions = JSON.parse(JSON.stringify(questions));
                 
                 if (shuffle) {
@@ -746,35 +763,36 @@
                 }
                 
                 if (shuffleOptions) {
-                    this.questions.forEach(q => {
-                        if (q.options && q.options.length > 1) {
-                            // Store original letter before shuffling
-                            q.options.forEach(opt => {
-                                opt.original_letter = opt.letter;
-                            });
-                            // Shuffle the options
-                            this.shuffleArray(q.options);
-                            // Reassign letters to be sequential (a, b, c, d...)
-                            const letters = ['a', 'b', 'c', 'd', 'e', 'f'];
-                            q.options.forEach((opt, idx) => {
-                                opt.letter = letters[idx];
-                            });
-                            // Update correct_answers to use new letters
-                            const newCorrectAnswers = q.correct_answers.map(oldLetter => {
-                                const opt = q.options.find(o => o.original_letter === oldLetter);
-                                return opt ? opt.letter : oldLetter;
-                            });
-                            // Sort to maintain alphabetical order (b, c, d, f instead of f, c, d, b)
-                            q.correct_answers = newCorrectAnswers.sort();
-                        }
-                    });
+                    this.shuffleOptions();
                 }
                 
                 this.currentIndex = 0;
-                this.answers = {}; // question_number -> selected answers
-                this.results = {}; // question_number -> is_correct
-                this.markedQuestions = new Set(); // Set of question_numbers marked for review
+                this.answers = {};
+                this.results = {};
+                this.markedQuestions = new Set();
                 this.score = 0;
+            }
+            
+            shuffleOptions() {
+                this.questions.forEach(q => {
+                    if (q.options && q.options.length > 1) {
+                        q.options.forEach(opt => {
+                            opt.original_letter = opt.letter;
+                        });
+                        this.shuffleArray(q.options);
+                        
+                        const letters = ['a', 'b', 'c', 'd', 'e', 'f'];
+                        q.options.forEach((opt, idx) => {
+                            opt.letter = letters[idx];
+                        });
+                        
+                        const newCorrectAnswers = q.correct_answers.map(oldLetter => {
+                            const opt = q.options.find(o => o.original_letter === oldLetter);
+                            return opt ? opt.letter : oldLetter;
+                        });
+                        q.correct_answers = newCorrectAnswers.sort();
+                    }
+                });
             }
             
             shuffleArray(array) {
@@ -883,25 +901,25 @@
             }
         }
 
-        // Global state
+        // ==================== Global State ====================
         let examSession = null;
         let uploadedFileData = null;
         let selectedAnswers = [];
         let categoryCountsData = {};
         let selectedCategoriesList = [];
+        let categoriesExpanded = false;
         
-        // Constants for localStorage
         const STORAGE_KEY = 'exam-simulator-progress';
         const STORAGE_VERSION = '1.0';
 
-        // DOM Elements
+        // ==================== DOM Elements ====================
         const fileUpload = document.getElementById('file-upload');
         const dropZone = document.getElementById('drop-zone');
         const uploadSection = document.getElementById('upload-section');
         const configSection = document.getElementById('config-section');
         const errorMessage = document.getElementById('error-message');
 
-        // File upload handlers
+        // ==================== File Upload Handlers ====================
         fileUpload.addEventListener('change', handleFileSelect);
         
         dropZone.addEventListener('click', () => fileUpload.click());
@@ -941,7 +959,6 @@
                         throw new Error('Invalid question file: no questions found');
                     }
                     
-                    // Validate question structure
                     const valid = questions.every(q => 
                         q.question_number && 
                         q.question_text && 
@@ -975,17 +992,13 @@
             document.getElementById('config-filename').textContent = uploadedFileData.file.name;
             document.getElementById('total-questions').textContent = uploadedFileData.totalCount;
             
-            // Populate categories first to get the count
             const categories = populateCategories();
             document.getElementById('total-categories').textContent = categories.length;
-            
-            // updateQuestionCountMax() in populateCategories() will set the default value
         }
 
         function populateCategories() {
             const questions = uploadedFileData.questions;
             
-            // Extract unique categories and count questions per category
             categoryCountsData = {};
             questions.forEach(q => {
                 const cat = q.category || 'Uncategorized';
@@ -1007,7 +1020,6 @@
                 categoryGrid.appendChild(div);
             });
             
-            // Handle select all/deselect all
             const selectAllCheckbox = document.getElementById('select-all-categories');
             selectAllCheckbox.addEventListener('change', (e) => {
                 const checkboxes = categoryGrid.querySelectorAll('input[type="checkbox"]');
@@ -1015,13 +1027,11 @@
                 updateQuestionCountMax();
             });
             
-            // Add change listeners to all category checkboxes
             const checkboxes = categoryGrid.querySelectorAll('input[type="checkbox"]');
             checkboxes.forEach(cb => {
                 cb.addEventListener('change', updateQuestionCountMax);
             });
             
-            // Initial max calculation
             updateQuestionCountMax();
             
             return categories;
@@ -1048,12 +1058,10 @@
             
             countInput.max = totalSelected;
             
-            // Default to total number of questions from selected categories
             if (totalSelected > 0) {
                 countInput.value = totalSelected;
             }
             
-            // Update help text
             helpText.textContent = `Enter a number between 1 and ${totalSelected} (selected categories)`;
         }
 
@@ -1075,6 +1083,7 @@
             errorMessage.classList.add('hidden');
         }
 
+        // ==================== Exam Control ====================
         function startExam(skipResumeCheck = false) {
             hideError();
             
@@ -1083,7 +1092,6 @@
                 return;
             }
             
-            // Check for saved progress
             if (!skipResumeCheck) {
                 const savedState = loadExamState();
                 if (savedState && savedState.filename === uploadedFileData.file.name) {
@@ -1100,7 +1108,6 @@
                 return;
             }
             
-            // Get selected categories
             const categoryCheckboxes = document.querySelectorAll('#category-grid input[type="checkbox"]:checked');
             const selectedCategories = Array.from(categoryCheckboxes).map(cb => cb.value);
             
@@ -1109,7 +1116,6 @@
                 return;
             }
             
-            // Filter questions by selected categories
             let questions = uploadedFileData.questions.filter(q => {
                 const cat = q.category || 'Uncategorized';
                 return selectedCategories.includes(cat);
@@ -1128,7 +1134,6 @@
             const shuffle = document.getElementById('shuffle-checkbox').checked;
             const shuffleOptions = document.getElementById('shuffle-options-checkbox').checked;
             
-            // Shuffle questions if needed
             if (shuffle) {
                 questions = [...questions];
                 for (let i = questions.length - 1; i > 0; i--) {
@@ -1141,13 +1146,10 @@
                 questions = questions.slice(0, questionCount);
             }
             
-            // Store selected categories for display
             selectedCategoriesList = selectedCategories;
             
-            // Create exam session
             examSession = new ExamSession(questions, false, shuffleOptions);
             
-            // Clear any old saved state for a fresh exam
             clearExamState();
             
             document.getElementById('start-screen').classList.add('hidden');
@@ -1156,9 +1158,8 @@
             renderSelectedCategories();
             renderQuestion();
         }
-        
+
         // ==================== Progress Persistence ====================
-        
         function saveExamState() {
             if (!examSession || !uploadedFileData) return;
             
@@ -1192,7 +1193,6 @@
                 
                 const state = JSON.parse(saved);
                 
-                // Validate version
                 if (state.version !== STORAGE_VERSION) {
                     clearExamState();
                     return null;
@@ -1297,38 +1297,31 @@
             const answeredCount = Object.keys(state.results || {}).length;
             const totalCount = state.questions.length;
             
-            // If exam is finished, show summary instead
             if (answeredCount >= totalCount) {
                 resumeToSummary(state);
                 return;
             }
             
-            // Restore uploadedFileData (we need to re-fetch or use current)
-            // The questions are stored in the saved state
             uploadedFileData = {
                 file: { name: state.filename },
                 questions: state.questions,
                 totalCount: state.questions.length
             };
             
-            // Restore categories
             selectedCategoriesList = state.selectedCategories || [];
             
-            // Create exam session with saved questions (no shuffle needed, already shuffled)
             examSession = new ExamSession(state.questions, false, false);
             examSession.currentIndex = state.currentIndex;
             examSession.answers = state.answers || {};
             examSession.results = state.results || {};
             examSession.score = state.score || 0;
             
-            // Restore marked questions
             if (state.markedQuestions && Array.isArray(state.markedQuestions)) {
                 state.markedQuestions.forEach(qNum => examSession.markedQuestions.add(qNum));
             }
             
             hideResumePrompt();
             
-            // Switch screens
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('exam-screen').classList.remove('hidden');
             
@@ -1346,30 +1339,25 @@
         }
         
         function resumeToSummary(state) {
-            // Restore uploadedFileData
             uploadedFileData = {
                 file: { name: state.filename },
                 questions: state.questions,
                 totalCount: state.questions.length
             };
             
-            // Restore categories
             selectedCategoriesList = state.selectedCategories || [];
             
-            // Create exam session with saved questions
             examSession = new ExamSession(state.questions, false, false);
             examSession.answers = state.answers || {};
             examSession.results = state.results || {};
             examSession.score = state.score || 0;
             
-            // Restore marked questions
             if (state.markedQuestions && Array.isArray(state.markedQuestions)) {
                 state.markedQuestions.forEach(qNum => examSession.markedQuestions.add(qNum));
             }
             
             hideResumePrompt();
             
-            // Show summary screen directly
             showSummaryFromSession();
         }
         
@@ -1380,7 +1368,6 @@
             document.getElementById('exam-screen').classList.add('hidden');
             document.getElementById('summary-screen').classList.remove('hidden');
             
-            // Pass/Fail status
             const statusDiv = document.getElementById('pass-status');
             statusDiv.className = 'pass-status ' + (summary.passed ? 'passed' : 'failed');
             statusDiv.innerHTML = `
@@ -1388,18 +1375,15 @@
                 <p>Score: ${summary.percentage}% (70% required to pass)</p>
             `;
             
-            // Stats
             document.getElementById('stat-total').textContent = summary.total;
             document.getElementById('stat-correct').textContent = summary.correct;
             document.getElementById('stat-incorrect').textContent = summary.incorrect;
             document.getElementById('stat-percentage').textContent = summary.percentage + '%';
             
-            // Summary grid
             refreshSummaryGrid();
         }
 
-        let categoriesExpanded = false;
-
+        // ==================== UI Rendering ====================
         function renderSelectedCategories() {
             const display = document.getElementById('selected-categories-list');
             if (selectedCategoriesList.length > 0) {
@@ -1410,7 +1394,6 @@
                 display.innerHTML = '<span style="margin-left: 0;">All</span>';
             }
             
-            // Add click handler for expand/collapse
             document.getElementById('selected-categories-header').onclick = toggleCategories;
         }
 
@@ -1436,13 +1419,11 @@
             const total = examSession.questions.length;
             const answered = Object.keys(examSession.results).length;
             
-            // Progress
             const progress = (answered / total) * 100;
             document.getElementById('progress-fill').style.width = progress + '%';
             document.getElementById('progress-text').textContent = 
                 `Progress: ${answered}/${total} questions answered (${Math.round(progress)}%)`;
             
-            // Question info
             document.getElementById('question-number').textContent = 
                 `Question ${index + 1} of ${total}`;
             document.getElementById('question-type').textContent = 
@@ -1451,7 +1432,6 @@
                     : 'Select 1 answer';
             document.getElementById('question-text').textContent = question.question_text;
             
-            // Options
             const optionsDiv = document.getElementById('options');
             optionsDiv.innerHTML = '';
             selectedAnswers = [];
@@ -1500,7 +1480,6 @@
                 optionsDiv.appendChild(div);
             });
             
-            // Feedback
             const feedbackDiv = document.getElementById('feedback');
             if (isAnswered) {
                 feedbackDiv.classList.remove('hidden');
@@ -1527,17 +1506,13 @@
                 feedbackDiv.classList.add('hidden');
             }
             
-            // Buttons
             document.getElementById('prev-btn').disabled = index === 0;
             document.getElementById('prev-btn').style.visibility = index === 0 ? 'hidden' : 'visible';
             document.getElementById('submit-btn').classList.toggle('hidden', isAnswered);
             document.getElementById('next-btn').classList.toggle('hidden', !isAnswered || index === total - 1);
             document.getElementById('finish-btn').classList.toggle('hidden', !isAnswered || index !== total - 1);
             
-            // Mark button
             updateMarkButton();
-            
-            // Navigator
             renderNavigator();
         }
 
@@ -1546,7 +1521,6 @@
             const inputs = document.querySelectorAll('input[name="answer"]');
             
             if (!isMulti) {
-                // Single choice
                 selectedAnswers = [letter];
                 inputs.forEach(input => {
                     input.checked = (input.value === letter);
@@ -1556,7 +1530,6 @@
                     opt.classList.toggle('selected', optLetter === letter);
                 });
             } else {
-                // Multiple choice
                 const idx = selectedAnswers.indexOf(letter);
                 inputs.forEach(input => {
                     if (input.value === letter) {
@@ -1573,60 +1546,6 @@
                     const optLetter = examSession.getCurrentQuestion().options[i].letter;
                     opt.classList.toggle('selected', selectedAnswers.includes(optLetter));
                 });
-            }
-        }
-
-        function submitAnswer() {
-            const inputs = document.querySelectorAll('input[name="answer"]:checked');
-            const answers = Array.from(inputs).map(input => input.value);
-            
-            if (answers.length === 0) {
-                alert('Please select at least one answer');
-                return;
-            }
-            
-            const question = examSession.getCurrentQuestion();
-            const correctCount = question.correct_answers.length;
-            
-            // Validation
-            if (correctCount > 1 && answers.length !== correctCount) {
-                alert(`Please select exactly ${correctCount} answers. You selected ${answers.length}.`);
-                return;
-            }
-            
-            if (correctCount === 1 && answers.length > 1) {
-                alert('This question has only one correct answer. Please select a single option.');
-                return;
-            }
-            
-            examSession.submitAnswer(answers);
-            selectedAnswers = [];
-            saveExamState(); // Auto-save progress
-            renderQuestion();
-        }
-
-        function nextQuestion() {
-            examSession.nextQuestion();
-            scrollToQuestionNumber();
-            renderQuestion();
-        }
-
-        function prevQuestion() {
-            examSession.prevQuestion();
-            scrollToQuestionNumber();
-            renderQuestion();
-        }
-
-        function goToQuestion(index) {
-            examSession.goToQuestion(index);
-            scrollToQuestionNumber();
-            renderQuestion();
-        }
-
-        function scrollToQuestionNumber() {
-            const questionNumber = document.querySelector('.question-number');
-            if (questionNumber) {
-                questionNumber.scrollIntoView({ behavior: 'auto', block: 'start' });
             }
         }
 
@@ -1659,7 +1578,6 @@
                 dot.title = isMarked ? 'Marked for review' : (result === undefined ? 'Unanswered' : (result ? 'Correct' : 'Incorrect'));
                 dot.onclick = () => goToQuestion(i);
                 
-                // Add pin icon for marked questions
                 if (isMarked) {
                     const pin = document.createElement('span');
                     pin.className = 'pin-icon';
@@ -1669,18 +1587,6 @@
                 
                 grid.appendChild(dot);
             });
-        }
-
-        function toggleMarkQuestion() {
-            if (!examSession) return;
-            
-            const question = examSession.getCurrentQuestion();
-            if (!question) return;
-            
-            const isMarked = examSession.toggleMark(question.question_number);
-            updateMarkButton();
-            renderNavigator();
-            saveExamState(); // Save progress including marked status
         }
 
         function updateMarkButton() {
@@ -1696,14 +1602,78 @@
             btn.style.color = isMarked ? 'white' : '#666';
         }
 
+        // ==================== Question Navigation ====================
+        function submitAnswer() {
+            const inputs = document.querySelectorAll('input[name="answer"]:checked');
+            const answers = Array.from(inputs).map(input => input.value);
+            
+            if (answers.length === 0) {
+                alert('Please select at least one answer');
+                return;
+            }
+            
+            const question = examSession.getCurrentQuestion();
+            const correctCount = question.correct_answers.length;
+            
+            if (correctCount > 1 && answers.length !== correctCount) {
+                alert(`Please select exactly ${correctCount} answers. You selected ${answers.length}.`);
+                return;
+            }
+            
+            if (correctCount === 1 && answers.length > 1) {
+                alert('This question has only one correct answer. Please select a single option.');
+                return;
+            }
+            
+            examSession.submitAnswer(answers);
+            selectedAnswers = [];
+            saveExamState();
+            renderQuestion();
+        }
+
+        function nextQuestion() {
+            examSession.nextQuestion();
+            scrollToQuestionNumber();
+            renderQuestion();
+        }
+
+        function prevQuestion() {
+            examSession.prevQuestion();
+            scrollToQuestionNumber();
+            renderQuestion();
+        }
+
+        function goToQuestion(index) {
+            examSession.goToQuestion(index);
+            scrollToQuestionNumber();
+            renderQuestion();
+        }
+
+        function scrollToQuestionNumber() {
+            const questionNumber = document.querySelector('.question-number');
+            if (questionNumber) {
+                questionNumber.scrollIntoView({ behavior: 'auto', block: 'start' });
+            }
+        }
+
+        function toggleMarkQuestion() {
+            if (!examSession) return;
+            
+            const question = examSession.getCurrentQuestion();
+            if (!question) return;
+            
+            const isMarked = examSession.toggleMark(question.question_number);
+            updateMarkButton();
+            renderNavigator();
+            saveExamState();
+        }
+
         function finishExam() {
             const summary = examSession.getSummary();
             
-            // Note: We keep the exam state in localStorage so user can resume to summary
             document.getElementById('exam-screen').classList.add('hidden');
             document.getElementById('summary-screen').classList.remove('hidden');
             
-            // Pass/Fail status
             const statusDiv = document.getElementById('pass-status');
             statusDiv.className = 'pass-status ' + (summary.passed ? 'passed' : 'failed');
             statusDiv.innerHTML = `
@@ -1711,67 +1681,13 @@
                 <p>Score: ${summary.percentage}% (70% required to pass)</p>
             `;
             
-            // Stats
             document.getElementById('stat-total').textContent = summary.total;
             document.getElementById('stat-correct').textContent = summary.correct;
             document.getElementById('stat-incorrect').textContent = summary.incorrect;
             document.getElementById('stat-percentage').textContent = summary.percentage + '%';
             
-            // Summary grid
             refreshSummaryGrid();
         }
-
-        // Auto-load default question file on page load
-        window.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const response = await fetch('sample-questions/ai-102-full.json');
-                if (!response.ok) {
-                    throw new Error('Failed to load default questions');
-                }
-                const questions = await response.json();
-                
-                if (!Array.isArray(questions) || questions.length === 0) {
-                    throw new Error('Invalid question file: no questions found');
-                }
-                
-                // Validate question structure
-                const valid = questions.every(q => 
-                    q.question_number && 
-                    q.question_text && 
-                    Array.isArray(q.options) && 
-                    Array.isArray(q.correct_answers)
-                );
-                
-                if (!valid) {
-                    throw new Error('Invalid question format: missing required fields');
-                }
-                
-                uploadedFileData = {
-                    file: { name: 'ai-102-full.json' },
-                    questions: questions,
-                    totalCount: questions.length
-                };
-                
-                showConfigSection();
-            } catch (err) {
-                console.log('Auto-load failed:', err.message);
-                // Silently fail - user can still upload manually
-            }
-        });
-
-        // Keyboard navigation
-document.addEventListener('keydown', (e) => {
-    const examScreen = document.getElementById('exam-screen');
-    if (examScreen.classList.contains('hidden')) return;
-    
-    if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        prevQuestion();
-    } else if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        nextQuestion();
-    }
-});
 
         function confirmClearProgress() {
             if (confirm('Are you sure you want to clear your progress and restart the exam?\n\nThis action cannot be undone.')) {
@@ -1779,20 +1695,18 @@ document.addEventListener('keydown', (e) => {
                 location.reload();
             }
         }
-        
+
+        // ==================== Summary Review ====================
         function showReviewDetail(q, result, userAnswer, displayNumber) {
             const container = document.getElementById('review-details');
             
-            // Clear any previously shown review details
             container.innerHTML = '';
             
             const isMarked = examSession.isMarked(q.question_number);
             
-            // Store current question being reviewed for the summary mark button
             window.currentReviewQuestionNumber = q.question_number;
             window.currentReviewDisplayNumber = displayNumber;
             
-            // Update the summary mark button
             updateSummaryMarkButton(isMarked);
             
             const div = document.createElement('div');
@@ -1834,13 +1748,8 @@ document.addEventListener('keydown', (e) => {
             
             const isMarked = examSession.toggleMark(window.currentReviewQuestionNumber);
             
-            // Update the summary mark button appearance
             updateSummaryMarkButton(isMarked);
-            
-            // Update the summary grid to show/hide pin icon
             refreshSummaryGrid();
-            
-            // Save to local storage
             saveExamState();
         }
         
@@ -1849,15 +1758,11 @@ document.addEventListener('keydown', (e) => {
             
             const isMarked = examSession.toggleMark(questionNumber);
             
-            // Update the summary mark button if this is the currently displayed question
             if (window.currentReviewQuestionNumber === questionNumber) {
                 updateSummaryMarkButton(isMarked);
             }
             
-            // Update the summary grid to show/hide pin icon
             refreshSummaryGrid();
-            
-            // Save to local storage
             saveExamState();
         }
         
@@ -1873,14 +1778,12 @@ document.addEventListener('keydown', (e) => {
                 dot.className = 'question-dot ' + (result === undefined ? 'unanswered' : (result ? 'correct' : 'incorrect'));
                 dot.textContent = i + 1;
                 dot.title = isMarked ? 'Marked for review' : (result === undefined ? 'Unanswered' : (result ? 'Correct' : 'Incorrect'));
-                // Use a closure to capture the current index for the click handler
                 dot.onclick = ((idx) => () => {
                     const question = examSession.questions[idx];
                     const res = examSession.results[question.question_number];
                     showReviewDetail(question, res, examSession.answers[question.question_number], idx + 1);
                 })(i);
                 
-                // Add pin icon for marked questions
                 if (isMarked) {
                     const pin = document.createElement('span');
                     pin.className = 'pin-icon';
@@ -1891,6 +1794,55 @@ document.addEventListener('keydown', (e) => {
                 grid.appendChild(dot);
             });
         }
+
+        // ==================== Initialization ====================
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('sample-questions/ai-102-full.json');
+                if (!response.ok) {
+                    throw new Error('Failed to load default questions');
+                }
+                const questions = await response.json();
+                
+                if (!Array.isArray(questions) || questions.length === 0) {
+                    throw new Error('Invalid question file: no questions found');
+                }
+                
+                const valid = questions.every(q => 
+                    q.question_number && 
+                    q.question_text && 
+                    Array.isArray(q.options) && 
+                    Array.isArray(q.correct_answers)
+                );
+                
+                if (!valid) {
+                    throw new Error('Invalid question format: missing required fields');
+                }
+                
+                uploadedFileData = {
+                    file: { name: 'ai-102-full.json' },
+                    questions: questions,
+                    totalCount: questions.length
+                };
+                
+                showConfigSection();
+            } catch (err) {
+                console.log('Auto-load failed:', err.message);
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            const examScreen = document.getElementById('exam-screen');
+            if (examScreen.classList.contains('hidden')) return;
+            
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevQuestion();
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                nextQuestion();
+            }
+        });
     </script>
 </body>
 </html>
