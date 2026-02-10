@@ -720,7 +720,7 @@
                 <div class="question-grid" id="summary-grid"></div>
                 
                 <div style="margin-top: 30px; text-align: center;">
-                    <button class="btn btn-primary" onclick="location.reload()">Start New Exam</button>
+                    <button class="btn btn-primary" onclick="startNewExam()">Start New Exam</button>
                 </div>
             </div>
             
@@ -1211,6 +1211,12 @@
             const totalCount = savedState.questions.length;
             const progressPercent = Math.round((answeredCount / totalCount) * 100);
             
+            // If exam is finished, show summary instead
+            if (answeredCount >= totalCount) {
+                resumeToSummary(savedState);
+                return;
+            }
+            
             const resumeHtml = `
                 <div id="resume-prompt" style="
                     position: fixed;
@@ -1240,7 +1246,7 @@
                             Progress: ${answeredCount}/${totalCount} answered (${progressPercent}%)
                         </p>
                         <div style="display: flex; gap: 10px;">
-                            <button class="btn btn-secondary" onclick="hideResumePrompt(); startExam(true);" style="flex: 1;">
+                            <button class="btn btn-secondary" onclick="startNewFromPrompt();" style="flex: 1;">
                                 Start New
                             </button>
                             <button class="btn btn-primary" onclick="resumeExam();" style="flex: 2;">
@@ -1259,10 +1265,30 @@
             if (prompt) prompt.remove();
         }
         
+        function startNewFromPrompt() {
+            clearExamState();
+            hideResumePrompt();
+            startExam(true);
+        }
+        
+        function startNewExam() {
+            clearExamState();
+            location.reload();
+        }
+        
         function resumeExam() {
             const state = loadExamState();
             if (!state) {
                 hideResumePrompt();
+                return;
+            }
+            
+            const answeredCount = Object.keys(state.results || {}).length;
+            const totalCount = state.questions.length;
+            
+            // If exam is finished, show summary instead
+            if (answeredCount >= totalCount) {
+                resumeToSummary(state);
                 return;
             }
             
@@ -1297,6 +1323,79 @@
             
             renderSelectedCategories();
             renderQuestion();
+        }
+        
+        function resumeToSummary(state) {
+            // Restore uploadedFileData
+            uploadedFileData = {
+                file: { name: state.filename },
+                questions: state.questions,
+                totalCount: state.questions.length
+            };
+            
+            // Restore categories
+            selectedCategoriesList = state.selectedCategories || [];
+            
+            // Create exam session with saved questions
+            examSession = new ExamSession(state.questions, false, false);
+            examSession.answers = state.answers || {};
+            examSession.results = state.results || {};
+            examSession.score = state.score || 0;
+            
+            // Restore marked questions
+            if (state.markedQuestions && Array.isArray(state.markedQuestions)) {
+                state.markedQuestions.forEach(qNum => examSession.markedQuestions.add(qNum));
+            }
+            
+            hideResumePrompt();
+            
+            // Show summary screen directly
+            showSummaryFromSession();
+        }
+        
+        function showSummaryFromSession() {
+            const summary = examSession.getSummary();
+            
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('exam-screen').classList.add('hidden');
+            document.getElementById('summary-screen').classList.remove('hidden');
+            
+            // Pass/Fail status
+            const statusDiv = document.getElementById('pass-status');
+            statusDiv.className = 'pass-status ' + (summary.passed ? 'passed' : 'failed');
+            statusDiv.innerHTML = `
+                <h2>${summary.passed ? '✓ PASSED!' : '✗ DID NOT PASS'}</h2>
+                <p>Score: ${summary.percentage}% (70% required to pass)</p>
+            `;
+            
+            // Stats
+            document.getElementById('stat-total').textContent = summary.total;
+            document.getElementById('stat-correct').textContent = summary.correct;
+            document.getElementById('stat-incorrect').textContent = summary.incorrect;
+            document.getElementById('stat-percentage').textContent = summary.percentage + '%';
+            
+            // Summary grid
+            const grid = document.getElementById('summary-grid');
+            grid.innerHTML = '';
+            examSession.questions.forEach((q, i) => {
+                const result = examSession.results[q.question_number];
+                const isMarked = examSession.isMarked(q.question_number);
+                const dot = document.createElement('div');
+                dot.className = 'question-dot ' + (result === undefined ? 'unanswered' : (result ? 'correct' : 'incorrect'));
+                dot.textContent = i + 1;
+                dot.title = isMarked ? 'Marked for review' : (result === undefined ? 'Unanswered' : (result ? 'Correct' : 'Incorrect'));
+                dot.onclick = () => showReviewDetail(q, result, examSession.answers[q.question_number], i + 1);
+                
+                // Add pin icon for marked questions
+                if (isMarked) {
+                    const pin = document.createElement('span');
+                    pin.className = 'pin-icon';
+                    pin.textContent = '📌';
+                    dot.appendChild(pin);
+                }
+                
+                grid.appendChild(dot);
+            });
         }
 
         let categoriesExpanded = false;
@@ -1600,9 +1699,7 @@
         function finishExam() {
             const summary = examSession.getSummary();
             
-            // Clear saved progress when exam is completed
-            clearExamState();
-            
+            // Note: We keep the exam state in localStorage so user can resume to summary
             document.getElementById('exam-screen').classList.add('hidden');
             document.getElementById('summary-screen').classList.remove('hidden');
             
