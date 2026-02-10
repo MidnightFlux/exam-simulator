@@ -649,6 +649,11 @@
                 <p style="text-align: center; color: #666; font-size: 0.85rem; margin-top: 15px;">
                     💡 Use <strong>←</strong> and <strong>→</strong> arrow keys to navigate between questions
                 </p>
+                <p style="text-align: center; margin-top: 10px;">
+                    <button class="btn btn-secondary" onclick="confirmClearProgress()" style="font-size: 0.8rem; padding: 8px 16px;">
+                        🗑️ Clear Progress & Restart
+                    </button>
+                </p>
             </div>
             
             <div id="feedback" class="card hidden"></div>
@@ -830,6 +835,10 @@
         let selectedAnswers = [];
         let categoryCountsData = {};
         let selectedCategoriesList = [];
+        
+        // Constants for localStorage
+        const STORAGE_KEY = 'exam-simulator-progress';
+        const STORAGE_VERSION = '1.0';
 
         // DOM Elements
         const fileUpload = document.getElementById('file-upload');
@@ -1012,12 +1021,21 @@
             errorMessage.classList.add('hidden');
         }
 
-        function startExam() {
+        function startExam(skipResumeCheck = false) {
             hideError();
             
             if (!uploadedFileData) {
                 showError('Please select a JSON question file');
                 return;
+            }
+            
+            // Check for saved progress
+            if (!skipResumeCheck) {
+                const savedState = loadExamState();
+                if (savedState && savedState.filename === uploadedFileData.file.name) {
+                    showResumePrompt(savedState);
+                    return;
+                }
             }
             
             const countInput = document.getElementById('question-count');
@@ -1075,6 +1093,152 @@
             // Create exam session
             examSession = new ExamSession(questions, false, shuffleOptions);
             
+            // Clear any old saved state for a fresh exam
+            clearExamState();
+            
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('exam-screen').classList.remove('hidden');
+            
+            renderSelectedCategories();
+            renderQuestion();
+        }
+        
+        // ==================== Progress Persistence ====================
+        
+        function saveExamState() {
+            if (!examSession || !uploadedFileData) return;
+            
+            const state = {
+                version: STORAGE_VERSION,
+                timestamp: Date.now(),
+                filename: uploadedFileData.file.name,
+                questions: examSession.questions,
+                currentIndex: examSession.currentIndex,
+                answers: examSession.answers,
+                results: examSession.results,
+                score: examSession.score,
+                selectedCategories: selectedCategoriesList,
+                config: {
+                    shuffleOptions: document.getElementById('shuffle-options-checkbox').checked
+                }
+            };
+            
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (e) {
+                console.warn('Failed to save exam progress:', e);
+            }
+        }
+        
+        function loadExamState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (!saved) return null;
+                
+                const state = JSON.parse(saved);
+                
+                // Validate version
+                if (state.version !== STORAGE_VERSION) {
+                    clearExamState();
+                    return null;
+                }
+                
+                return state;
+            } catch (e) {
+                console.warn('Failed to load exam progress:', e);
+                return null;
+            }
+        }
+        
+        function clearExamState() {
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+            } catch (e) {
+                console.warn('Failed to clear exam progress:', e);
+            }
+        }
+        
+        function showResumePrompt(savedState) {
+            const answeredCount = Object.keys(savedState.results || {}).length;
+            const totalCount = savedState.questions.length;
+            const progressPercent = Math.round((answeredCount / totalCount) * 100);
+            
+            const resumeHtml = `
+                <div id="resume-prompt" style="
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0,0,0,0.6);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1000;
+                ">
+                    <div style="
+                        background: white;
+                        padding: 30px;
+                        border-radius: 12px;
+                        max-width: 450px;
+                        width: 90%;
+                        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                    ">
+                        <h3 style="margin-bottom: 15px; color: #333;">📚 Resume Previous Session?</h3>
+                        <p style="margin-bottom: 10px; color: #666; line-height: 1.5;">
+                            You have an unfinished exam from <strong>${new Date(savedState.timestamp).toLocaleString()}</strong>.
+                        </p>
+                        <p style="margin-bottom: 20px; color: #667eea; font-weight: 500;">
+                            Progress: ${answeredCount}/${totalCount} answered (${progressPercent}%)
+                        </p>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-secondary" onclick="hideResumePrompt(); startExam(true);" style="flex: 1;">
+                                Start New
+                            </button>
+                            <button class="btn btn-primary" onclick="resumeExam();" style="flex: 2;">
+                                Resume Exam
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', resumeHtml);
+        }
+        
+        function hideResumePrompt() {
+            const prompt = document.getElementById('resume-prompt');
+            if (prompt) prompt.remove();
+        }
+        
+        function resumeExam() {
+            const state = loadExamState();
+            if (!state) {
+                hideResumePrompt();
+                return;
+            }
+            
+            // Restore uploadedFileData (we need to re-fetch or use current)
+            // The questions are stored in the saved state
+            uploadedFileData = {
+                file: { name: state.filename },
+                questions: state.questions,
+                totalCount: state.questions.length
+            };
+            
+            // Restore categories
+            selectedCategoriesList = state.selectedCategories || [];
+            
+            // Create exam session with saved questions (no shuffle needed, already shuffled)
+            examSession = new ExamSession(state.questions, false, false);
+            examSession.currentIndex = state.currentIndex;
+            examSession.answers = state.answers || {};
+            examSession.results = state.results || {};
+            examSession.score = state.score || 0;
+            
+            hideResumePrompt();
+            
+            // Switch screens
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('exam-screen').classList.remove('hidden');
             
@@ -1282,6 +1446,7 @@
             
             examSession.submitAnswer(answers);
             selectedAnswers = [];
+            saveExamState(); // Auto-save progress
             renderQuestion();
         }
 
@@ -1330,6 +1495,9 @@
 
         function finishExam() {
             const summary = examSession.getSummary();
+            
+            // Clear saved progress when exam is completed
+            clearExamState();
             
             document.getElementById('exam-screen').classList.add('hidden');
             document.getElementById('summary-screen').classList.remove('hidden');
@@ -1413,6 +1581,13 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+        function confirmClearProgress() {
+            if (confirm('Are you sure you want to clear your progress and restart the exam?\n\nThis action cannot be undone.')) {
+                clearExamState();
+                location.reload();
+            }
+        }
+        
         function showReviewDetail(q, result, userAnswer, displayNumber) {
             const container = document.getElementById('review-details');
             
