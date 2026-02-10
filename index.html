@@ -476,6 +476,26 @@
             color: #666;
         }
 
+        .question-dot {
+            position: relative;
+        }
+
+        .question-dot .pin-icon {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            font-size: 10px;
+            background: #ff9800;
+            color: white;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
         .question-dot.correct {
             background: #4caf50;
             color: white;
@@ -649,6 +669,11 @@
                     <button class="btn btn-primary hidden" id="next-btn" onclick="nextQuestion()">Next →</button>
                     <button class="btn btn-success hidden" id="finish-btn" onclick="finishExam()">Finish Exam</button>
                 </div>
+                <div style="text-align: center; margin-top: 15px;">
+                    <button class="btn btn-secondary" id="mark-btn" onclick="toggleMarkQuestion()" style="font-size: 0.9rem; padding: 10px 20px;">
+                        📌 Mark for Review
+                    </button>
+                </div>
                 <p style="text-align: center; color: #666; font-size: 0.85rem; margin-top: 15px;">
                     💡 Use <strong>←</strong> and <strong>→</strong> arrow keys to navigate between questions
                 </p>
@@ -742,6 +767,7 @@
                 this.currentIndex = 0;
                 this.answers = {}; // question_number -> selected answers
                 this.results = {}; // question_number -> is_correct
+                this.markedQuestions = new Set(); // Set of question_numbers marked for review
                 this.score = 0;
             }
             
@@ -829,6 +855,24 @@
                     passed,
                     score: this.score
                 };
+            }
+            
+            isMarked(questionNumber) {
+                return this.markedQuestions.has(questionNumber);
+            }
+            
+            toggleMark(questionNumber) {
+                if (this.markedQuestions.has(questionNumber)) {
+                    this.markedQuestions.delete(questionNumber);
+                    return false;
+                } else {
+                    this.markedQuestions.add(questionNumber);
+                    return true;
+                }
+            }
+            
+            getMarkedCount() {
+                return this.markedQuestions.size;
             }
         }
 
@@ -1119,6 +1163,7 @@
                 currentIndex: examSession.currentIndex,
                 answers: examSession.answers,
                 results: examSession.results,
+                markedQuestions: Array.from(examSession.markedQuestions),
                 score: examSession.score,
                 selectedCategories: selectedCategoriesList,
                 config: {
@@ -1238,6 +1283,11 @@
             examSession.answers = state.answers || {};
             examSession.results = state.results || {};
             examSession.score = state.score || 0;
+            
+            // Restore marked questions
+            if (state.markedQuestions && Array.isArray(state.markedQuestions)) {
+                state.markedQuestions.forEach(qNum => examSession.markedQuestions.add(qNum));
+            }
             
             hideResumePrompt();
             
@@ -1385,6 +1435,9 @@
             document.getElementById('next-btn').classList.toggle('hidden', !isAnswered || index === total - 1);
             document.getElementById('finish-btn').classList.toggle('hidden', !isAnswered || index !== total - 1);
             
+            // Mark button
+            updateMarkButton();
+            
             // Navigator
             renderNavigator();
         }
@@ -1485,15 +1538,63 @@
             examSession.questions.forEach((q, i) => {
                 const result = examSession.results[q.question_number];
                 const isCurrent = i === examSession.currentIndex;
+                const isMarked = examSession.isMarked(q.question_number);
                 
                 const dot = document.createElement('div');
-                dot.className = 'question-dot ' + 
-                    (result === undefined ? 'unanswered' : (result ? 'correct' : 'incorrect')) +
-                    (isCurrent ? ' current' : '');
+                let className = 'question-dot ';
+                
+                if (result === undefined) {
+                    className += 'unanswered ';
+                } else if (result) {
+                    className += 'correct ';
+                } else {
+                    className += 'incorrect ';
+                }
+                
+                if (isCurrent) {
+                    className += 'current ';
+                }
+                
+                dot.className = className.trim();
                 dot.textContent = i + 1;
+                dot.title = isMarked ? 'Marked for review' : (result === undefined ? 'Unanswered' : (result ? 'Correct' : 'Incorrect'));
                 dot.onclick = () => goToQuestion(i);
+                
+                // Add pin icon for marked questions
+                if (isMarked) {
+                    const pin = document.createElement('span');
+                    pin.className = 'pin-icon';
+                    pin.textContent = '📌';
+                    dot.appendChild(pin);
+                }
+                
                 grid.appendChild(dot);
             });
+        }
+
+        function toggleMarkQuestion() {
+            if (!examSession) return;
+            
+            const question = examSession.getCurrentQuestion();
+            if (!question) return;
+            
+            const isMarked = examSession.toggleMark(question.question_number);
+            updateMarkButton();
+            renderNavigator();
+            saveExamState(); // Save progress including marked status
+        }
+
+        function updateMarkButton() {
+            const btn = document.getElementById('mark-btn');
+            if (!examSession || !btn) return;
+            
+            const question = examSession.getCurrentQuestion();
+            if (!question) return;
+            
+            const isMarked = examSession.isMarked(question.question_number);
+            btn.innerHTML = isMarked ? '📌 Unmark Question' : '📌 Mark for Review';
+            btn.style.background = isMarked ? '#ff9800' : '#f5f5f5';
+            btn.style.color = isMarked ? 'white' : '#666';
         }
 
         function finishExam() {
@@ -1524,10 +1625,21 @@
             grid.innerHTML = '';
             examSession.questions.forEach((q, i) => {
                 const result = examSession.results[q.question_number];
+                const isMarked = examSession.isMarked(q.question_number);
                 const dot = document.createElement('div');
                 dot.className = 'question-dot ' + (result === undefined ? 'unanswered' : (result ? 'correct' : 'incorrect'));
                 dot.textContent = i + 1;
+                dot.title = isMarked ? 'Marked for review' : (result === undefined ? 'Unanswered' : (result ? 'Correct' : 'Incorrect'));
                 dot.onclick = () => showReviewDetail(q, result, examSession.answers[q.question_number], i + 1);
+                
+                // Add pin icon for marked questions
+                if (isMarked) {
+                    const pin = document.createElement('span');
+                    pin.className = 'pin-icon';
+                    pin.textContent = '📌';
+                    dot.appendChild(pin);
+                }
+                
                 grid.appendChild(dot);
             });
         }
