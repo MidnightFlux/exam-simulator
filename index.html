@@ -858,15 +858,16 @@
             }
             
             isMarked(questionNumber) {
-                return this.markedQuestions.has(questionNumber);
+                return this.markedQuestions.has(String(questionNumber));
             }
             
             toggleMark(questionNumber) {
-                if (this.markedQuestions.has(questionNumber)) {
-                    this.markedQuestions.delete(questionNumber);
+                const qNum = String(questionNumber);
+                if (this.markedQuestions.has(qNum)) {
+                    this.markedQuestions.delete(qNum);
                     return false;
                 } else {
-                    this.markedQuestions.add(questionNumber);
+                    this.markedQuestions.add(qNum);
                     return true;
                 }
             }
@@ -1272,8 +1273,10 @@
         }
         
         function startNewExam() {
-            clearExamState();
-            location.reload();
+            if (confirm('Are you sure you want to start a new exam?\n\nYour current exam progress and results will be cleared. This action cannot be undone.')) {
+                clearExamState();
+                location.reload();
+            }
         }
         
         function resumeExam() {
@@ -1375,27 +1378,7 @@
             document.getElementById('stat-percentage').textContent = summary.percentage + '%';
             
             // Summary grid
-            const grid = document.getElementById('summary-grid');
-            grid.innerHTML = '';
-            examSession.questions.forEach((q, i) => {
-                const result = examSession.results[q.question_number];
-                const isMarked = examSession.isMarked(q.question_number);
-                const dot = document.createElement('div');
-                dot.className = 'question-dot ' + (result === undefined ? 'unanswered' : (result ? 'correct' : 'incorrect'));
-                dot.textContent = i + 1;
-                dot.title = isMarked ? 'Marked for review' : (result === undefined ? 'Unanswered' : (result ? 'Correct' : 'Incorrect'));
-                dot.onclick = () => showReviewDetail(q, result, examSession.answers[q.question_number], i + 1);
-                
-                // Add pin icon for marked questions
-                if (isMarked) {
-                    const pin = document.createElement('span');
-                    pin.className = 'pin-icon';
-                    pin.textContent = '📌';
-                    dot.appendChild(pin);
-                }
-                
-                grid.appendChild(dot);
-            });
+            refreshSummaryGrid();
         }
 
         let categoriesExpanded = false;
@@ -1718,27 +1701,7 @@
             document.getElementById('stat-percentage').textContent = summary.percentage + '%';
             
             // Summary grid
-            const grid = document.getElementById('summary-grid');
-            grid.innerHTML = '';
-            examSession.questions.forEach((q, i) => {
-                const result = examSession.results[q.question_number];
-                const isMarked = examSession.isMarked(q.question_number);
-                const dot = document.createElement('div');
-                dot.className = 'question-dot ' + (result === undefined ? 'unanswered' : (result ? 'correct' : 'incorrect'));
-                dot.textContent = i + 1;
-                dot.title = isMarked ? 'Marked for review' : (result === undefined ? 'Unanswered' : (result ? 'Correct' : 'Incorrect'));
-                dot.onclick = () => showReviewDetail(q, result, examSession.answers[q.question_number], i + 1);
-                
-                // Add pin icon for marked questions
-                if (isMarked) {
-                    const pin = document.createElement('span');
-                    pin.className = 'pin-icon';
-                    pin.textContent = '📌';
-                    dot.appendChild(pin);
-                }
-                
-                grid.appendChild(dot);
-            });
+            refreshSummaryGrid();
         }
 
         // Auto-load default question file on page load
@@ -1806,12 +1769,21 @@ document.addEventListener('keydown', (e) => {
             // Clear any previously shown review details
             container.innerHTML = '';
             
+            const isMarked = examSession.isMarked(q.question_number);
+            
             const div = document.createElement('div');
             div.id = `review-${displayNumber}`;
             div.className = 'card';
             div.style.marginTop = '20px';
             div.innerHTML = `
-                <h3>Question ${displayNumber}</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="margin: 0;">Question ${displayNumber}</h3>
+                    <button class="btn btn-secondary" id="mark-btn-${displayNumber}" 
+                            onclick="toggleMarkFromSummary('${q.question_number}', ${displayNumber})"
+                            style="font-size: 0.9rem; padding: 8px 16px; ${isMarked ? 'background: #ff9800; color: white;' : ''}">
+                        ${isMarked ? '📌 Unmark Question' : '📌 Mark for Review'}
+                    </button>
+                </div>
                 <p style="margin: 15px 0; white-space: pre-wrap;">${q.question_text}</p>
                 <p><strong>Your answer:</strong> ${(userAnswer || []).join(', ') || 'None'}</p>
                 <p><strong>Correct answer:</strong> ${q.correct_answers.join(', ')}</p>
@@ -1827,6 +1799,57 @@ document.addEventListener('keydown', (e) => {
                 ` : ''}
             `;
             container.appendChild(div);
+        }
+        
+        function toggleMarkFromSummary(questionNumber, displayNumber) {
+            if (!examSession) return;
+            
+            const isMarked = examSession.toggleMark(questionNumber);
+            
+            // Update the button appearance
+            const btn = document.getElementById(`mark-btn-${displayNumber}`);
+            if (btn) {
+                btn.innerHTML = isMarked ? '📌 Unmark Question' : '📌 Mark for Review';
+                btn.style.background = isMarked ? '#ff9800' : '#f5f5f5';
+                btn.style.color = isMarked ? 'white' : '#666';
+            }
+            
+            // Update the summary grid to show/hide pin icon
+            refreshSummaryGrid();
+            
+            // Save to local storage
+            saveExamState();
+        }
+        
+        function refreshSummaryGrid() {
+            const grid = document.getElementById('summary-grid');
+            if (!grid || !examSession) return;
+            
+            grid.innerHTML = '';
+            examSession.questions.forEach((q, i) => {
+                const result = examSession.results[q.question_number];
+                const isMarked = examSession.isMarked(q.question_number);
+                const dot = document.createElement('div');
+                dot.className = 'question-dot ' + (result === undefined ? 'unanswered' : (result ? 'correct' : 'incorrect'));
+                dot.textContent = i + 1;
+                dot.title = isMarked ? 'Marked for review' : (result === undefined ? 'Unanswered' : (result ? 'Correct' : 'Incorrect'));
+                // Use a closure to capture the current index for the click handler
+                dot.onclick = ((idx) => () => {
+                    const question = examSession.questions[idx];
+                    const res = examSession.results[question.question_number];
+                    showReviewDetail(question, res, examSession.answers[question.question_number], idx + 1);
+                })(i);
+                
+                // Add pin icon for marked questions
+                if (isMarked) {
+                    const pin = document.createElement('span');
+                    pin.className = 'pin-icon';
+                    pin.textContent = '📌';
+                    dot.appendChild(pin);
+                }
+                
+                grid.appendChild(dot);
+            });
         }
     </script>
 </body>
