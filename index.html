@@ -1719,18 +1719,21 @@
 
         function nextQuestion() {
             examSession.nextQuestion();
+            saveExamState();
             scrollToQuestionNumber();
             renderQuestion();
         }
 
         function prevQuestion() {
             examSession.prevQuestion();
+            saveExamState();
             scrollToQuestionNumber();
             renderQuestion();
         }
 
         function goToQuestion(index) {
             examSession.goToQuestion(index);
+            saveExamState();
             scrollToQuestionNumber();
             renderQuestion();
         }
