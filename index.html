@@ -1215,11 +1215,7 @@
             const totalCount = savedState.questions.length;
             const progressPercent = Math.round((answeredCount / totalCount) * 100);
             
-            // If exam is finished, show summary instead
-            if (answeredCount >= totalCount) {
-                resumeToSummary(savedState);
-                return;
-            }
+            const isFinished = answeredCount >= totalCount;
             
             const resumeHtml = `
                 <div id="resume-prompt" style="
@@ -1244,17 +1240,23 @@
                     ">
                         <h3 style="margin-bottom: 15px; color: #333;">📚 Resume Previous Session?</h3>
                         <p style="margin-bottom: 10px; color: #666; line-height: 1.5;">
-                            You have an unfinished exam from <strong>${new Date(savedState.timestamp).toLocaleString()}</strong>.
+                            ${isFinished 
+                                ? `You have a <strong>completed</strong> exam from <strong>${new Date(savedState.timestamp).toLocaleString()}</strong>.`
+                                : `You have an unfinished exam from <strong>${new Date(savedState.timestamp).toLocaleString()}</strong>.`
+                            }
                         </p>
                         <p style="margin-bottom: 20px; color: #667eea; font-weight: 500;">
-                            Progress: ${answeredCount}/${totalCount} answered (${progressPercent}%)
+                            ${isFinished 
+                                ? `All ${totalCount} questions completed (${progressPercent}%)`
+                                : `Progress: ${answeredCount}/${totalCount} answered (${progressPercent}%)`
+                            }
                         </p>
                         <div style="display: flex; gap: 10px;">
                             <button class="btn btn-secondary" onclick="startNewFromPrompt();" style="flex: 1;">
                                 Start New
                             </button>
-                            <button class="btn btn-primary" onclick="resumeExam();" style="flex: 2;">
-                                Resume Exam
+                            <button class="btn btn-primary" onclick="${isFinished ? 'viewSummary()' : 'resumeExam()'};" style="flex: 2;">
+                                ${isFinished ? 'View Summary' : 'Resume Exam'}
                             </button>
                         </div>
                     </div>
@@ -1329,6 +1331,15 @@
             
             renderSelectedCategories();
             renderQuestion();
+        }
+        
+        function viewSummary() {
+            const state = loadExamState();
+            if (!state) {
+                hideResumePrompt();
+                return;
+            }
+            resumeToSummary(state);
         }
         
         function resumeToSummary(state) {
