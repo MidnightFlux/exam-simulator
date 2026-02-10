@@ -721,6 +721,9 @@
                 
                 <div style="margin-top: 30px; text-align: center;">
                     <button class="btn btn-primary" onclick="startNewExam()">Start New Exam</button>
+                    <button class="btn btn-secondary" id="summary-mark-btn" onclick="toggleMarkFromSummaryButton()" style="margin-left: 10px; font-size: 0.9rem; padding: 10px 20px;">
+                        📌 Mark for Review
+                    </button>
                 </div>
             </div>
             
@@ -1771,18 +1774,20 @@ document.addEventListener('keydown', (e) => {
             
             const isMarked = examSession.isMarked(q.question_number);
             
+            // Store current question being reviewed for the summary mark button
+            window.currentReviewQuestionNumber = q.question_number;
+            window.currentReviewDisplayNumber = displayNumber;
+            
+            // Update the summary mark button
+            updateSummaryMarkButton(isMarked);
+            
             const div = document.createElement('div');
             div.id = `review-${displayNumber}`;
             div.className = 'card';
             div.style.marginTop = '20px';
             div.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <div style="margin-bottom: 15px;">
                     <h3 style="margin: 0;">Question ${displayNumber}</h3>
-                    <button class="btn btn-secondary" id="mark-btn-${displayNumber}" 
-                            onclick="toggleMarkFromSummary('${q.question_number}', ${displayNumber})"
-                            style="font-size: 0.9rem; padding: 8px 16px; ${isMarked ? 'background: #ff9800; color: white;' : ''}">
-                        ${isMarked ? '📌 Unmark Question' : '📌 Mark for Review'}
-                    </button>
                 </div>
                 <p style="margin: 15px 0; white-space: pre-wrap;">${q.question_text}</p>
                 <p><strong>Your answer:</strong> ${(userAnswer || []).join(', ') || 'None'}</p>
@@ -1801,17 +1806,38 @@ document.addEventListener('keydown', (e) => {
             container.appendChild(div);
         }
         
+        function updateSummaryMarkButton(isMarked) {
+            const btn = document.getElementById('summary-mark-btn');
+            if (btn) {
+                btn.innerHTML = isMarked ? '📌 Unmark Question' : '📌 Mark for Review';
+                btn.style.background = isMarked ? '#ff9800' : '#f5f5f5';
+                btn.style.color = isMarked ? 'white' : '#666';
+            }
+        }
+        
+        function toggleMarkFromSummaryButton() {
+            if (!examSession || !window.currentReviewQuestionNumber) return;
+            
+            const isMarked = examSession.toggleMark(window.currentReviewQuestionNumber);
+            
+            // Update the summary mark button appearance
+            updateSummaryMarkButton(isMarked);
+            
+            // Update the summary grid to show/hide pin icon
+            refreshSummaryGrid();
+            
+            // Save to local storage
+            saveExamState();
+        }
+        
         function toggleMarkFromSummary(questionNumber, displayNumber) {
             if (!examSession) return;
             
             const isMarked = examSession.toggleMark(questionNumber);
             
-            // Update the button appearance
-            const btn = document.getElementById(`mark-btn-${displayNumber}`);
-            if (btn) {
-                btn.innerHTML = isMarked ? '📌 Unmark Question' : '📌 Mark for Review';
-                btn.style.background = isMarked ? '#ff9800' : '#f5f5f5';
-                btn.style.color = isMarked ? 'white' : '#666';
+            // Update the summary mark button if this is the currently displayed question
+            if (window.currentReviewQuestionNumber === questionNumber) {
+                updateSummaryMarkButton(isMarked);
             }
             
             // Update the summary grid to show/hide pin icon
