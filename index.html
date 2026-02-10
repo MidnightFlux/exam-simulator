@@ -500,6 +500,24 @@
             display: none !important;
         }
 
+        .categories-expanded {
+            max-height: 300px !important;
+            opacity: 1 !important;
+            margin-top: 8px;
+        }
+
+        .categories-collapsed {
+            max-height: 0 !important;
+            opacity: 0 !important;
+        }
+
+        #selected-categories-header:hover {
+            background: #f8f9ff;
+            border-radius: 4px;
+            margin: -4px -8px;
+            padding: 4px 8px;
+        }
+
         @media (max-width: 600px) {
             .header h1 {
                 font-size: 1.8rem;
@@ -601,8 +619,11 @@
         <div id="exam-screen" class="hidden">
             <div class="card">
                 <div id="selected-categories-display" style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e0e0e0;">
-                    <span style="color: #666; font-size: 0.9rem;">Categories: </span>
-                    <span id="selected-categories-list" style="font-weight: 500; color: #667eea;"></span>
+                    <div id="selected-categories-header" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none;">
+                        <span style="color: #666; font-size: 0.9rem;">Categories</span>
+                        <span id="categories-toggle-icon" style="transition: transform 0.3s ease;">&#9662;</span>
+                    </div>
+                    <div id="selected-categories-list" class="categories-collapsed" style="font-weight: 500; color: #667eea; overflow: hidden; transition: max-height 0.3s ease, opacity 0.3s ease; max-height: 0; opacity: 0;"></div>
                 </div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="progress-fill"></div>
@@ -1054,14 +1075,35 @@
             renderQuestion();
         }
 
+        let categoriesExpanded = false;
+
         function renderSelectedCategories() {
             const display = document.getElementById('selected-categories-list');
             if (selectedCategoriesList.length > 0) {
-                display.innerHTML = '<ul style="margin: 8px 0 0 0; padding-left: 20px; color: #667eea;">' +
+                display.innerHTML = '<ul style="margin: 0; padding-left: 20px; color: #667eea;">' +
                     selectedCategoriesList.map(cat => `<li style="margin-bottom: 4px;">${cat}</li>`).join('') +
                     '</ul>';
             } else {
-                display.textContent = 'All';
+                display.innerHTML = '<span style="margin-left: 0;">All</span>';
+            }
+            
+            // Add click handler for expand/collapse
+            document.getElementById('selected-categories-header').onclick = toggleCategories;
+        }
+
+        function toggleCategories() {
+            const list = document.getElementById('selected-categories-list');
+            const icon = document.getElementById('categories-toggle-icon');
+            categoriesExpanded = !categoriesExpanded;
+            
+            if (categoriesExpanded) {
+                list.classList.remove('categories-collapsed');
+                list.classList.add('categories-expanded');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                list.classList.remove('categories-expanded');
+                list.classList.add('categories-collapsed');
+                icon.style.transform = 'rotate(0deg)';
             }
         }
 
@@ -1237,6 +1279,7 @@
 
         function nextQuestion() {
             examSession.nextQuestion();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             renderQuestion();
         }
 
