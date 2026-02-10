@@ -1464,9 +1464,10 @@
                 } else {
                     div.onclick = () => toggleOption(opt.letter, question.correct_answers.length > 1);
                     div.innerHTML = `
-                        <label class="option-content">
+                        <label class="option-content" onclick="event.stopPropagation();">
                             <input type="${question.correct_answers.length > 1 ? 'checkbox' : 'radio'}" 
-                                   name="answer" value="${opt.letter}">
+                                   name="answer" value="${opt.letter}"
+                                   onchange="handleOptionChange('${opt.letter}', ${question.correct_answers.length > 1})">
                             <span class="option-label">${opt.letter})</span>
                             <span class="option-text">${opt.text}</span>
                         </label>
@@ -1512,37 +1513,66 @@
             renderNavigator();
         }
 
-        function toggleOption(letter, isMulti) {
-            const options = document.querySelectorAll('.option');
-            const inputs = document.querySelectorAll('input[name="answer"]');
+        function handleOptionChange(letter, isMulti) {
+            // Stop propagation to prevent the div's onclick from firing
+            event.stopPropagation();
+            
+            // This is called when the input's checked state changes (via user click on input)
+            const input = document.querySelector(`input[value="${letter}"]`);
+            const isChecked = input ? input.checked : false;
             
             if (!isMulti) {
-                selectedAnswers = [letter];
-                inputs.forEach(input => {
-                    input.checked = (input.value === letter);
-                });
-                options.forEach((opt, i) => {
-                    const optLetter = examSession.getCurrentQuestion().options[i].letter;
-                    opt.classList.toggle('selected', optLetter === letter);
+                // For single choice: clear all and select this one
+                selectedAnswers = isChecked ? [letter] : [];
+                // Ensure only this input is checked
+                document.querySelectorAll('input[name="answer"]').forEach(inp => {
+                    inp.checked = (inp.value === letter);
                 });
             } else {
+                // For multiple choice: add or remove based on checked state
                 const idx = selectedAnswers.indexOf(letter);
-                inputs.forEach(input => {
-                    if (input.value === letter) {
-                        input.checked = !input.checked;
-                    }
+                if (isChecked && idx === -1) {
+                    selectedAnswers.push(letter);
+                } else if (!isChecked && idx > -1) {
+                    selectedAnswers.splice(idx, 1);
+                }
+            }
+            
+            updateOptionStyles();
+        }
+        
+        function toggleOption(letter, isMulti) {
+            // This is called when clicking on the option div (not directly on input)
+            const input = document.querySelector(`input[value="${letter}"]`);
+            if (!input) return;
+            
+            if (!isMulti) {
+                // For single choice: select this option
+                selectedAnswers = [letter];
+                // Uncheck all inputs, then check this one
+                document.querySelectorAll('input[name="answer"]').forEach(inp => {
+                    inp.checked = (inp.value === letter);
                 });
+            } else {
+                // For multiple choice: toggle this option
+                input.checked = !input.checked;
+                const idx = selectedAnswers.indexOf(letter);
                 if (idx > -1) {
                     selectedAnswers.splice(idx, 1);
                 } else {
                     selectedAnswers.push(letter);
                 }
-                
-                options.forEach((opt, i) => {
-                    const optLetter = examSession.getCurrentQuestion().options[i].letter;
-                    opt.classList.toggle('selected', selectedAnswers.includes(optLetter));
-                });
             }
+            
+            updateOptionStyles();
+        }
+        
+        function updateOptionStyles() {
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                const optLetter = examSession.getCurrentQuestion().options[i].letter;
+                opt.classList.toggle('selected', selectedAnswers.includes(optLetter));
+            });
         }
 
         function renderNavigator() {
