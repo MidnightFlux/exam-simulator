@@ -119,11 +119,26 @@
             cursor: pointer;
             transition: all 0.2s ease;
             overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
         .option:hover {
             border-color: #667eea;
             background: #f8f9ff;
+        }
+
+        /* Disable hover effects on touch devices to prevent sticky highlight */
+        @media (hover: none) {
+            .option:hover {
+                border-color: #e0e0e0;
+                background: transparent;
+            }
+            
+            .option.selected:hover {
+                border-color: #667eea;
+                background: #e8eaf6;
+            }
         }
 
         .option.selected {
@@ -151,6 +166,30 @@
             height: 20px;
             cursor: pointer;
             flex-shrink: 0;
+            outline: none;
+        }
+
+        /* Remove focus outline on touch devices to prevent sticky highlight */
+        @media (hover: none) {
+            .option input:focus {
+                outline: none;
+            }
+            
+            .option:focus,
+            .option:focus-within {
+                outline: none;
+            }
+            
+            /* Also remove active state highlight */
+            .option:active {
+                border-color: #e0e0e0;
+                background: transparent;
+            }
+            
+            .option.selected:active {
+                border-color: #667eea;
+                background: #e8eaf6;
+            }
         }
 
         .option-content {
@@ -1463,11 +1502,16 @@
                     `;
                 } else {
                     div.onclick = () => toggleOption(opt.letter, question.correct_answers.length > 1);
+                    // Add touch event to prevent sticky hover states on touch devices
+                    div.ontouchstart = (e) => {
+                        // Prevent default to avoid double-firing on some devices
+                        // but ensure the click still registers
+                    };
                     div.innerHTML = `
                         <label class="option-content" onclick="event.stopPropagation();">
                             <input type="${question.correct_answers.length > 1 ? 'checkbox' : 'radio'}" 
                                    name="answer" value="${opt.letter}"
-                                   onchange="handleOptionChange('${opt.letter}', ${question.correct_answers.length > 1})">
+                                   onchange="handleOptionChange(event, '${opt.letter}', ${question.correct_answers.length > 1})">
                             <span class="option-label">${opt.letter})</span>
                             <span class="option-text">${opt.text}</span>
                         </label>
@@ -1513,13 +1557,16 @@
             renderNavigator();
         }
 
-        function handleOptionChange(letter, isMulti) {
+        function handleOptionChange(event, letter, isMulti) {
             // Stop propagation to prevent the div's onclick from firing
             event.stopPropagation();
             
             // This is called when the input's checked state changes (via user click on input)
             const input = document.querySelector(`input[value="${letter}"]`);
             const isChecked = input ? input.checked : false;
+            
+            // Remove focus to prevent sticky highlight on touch devices
+            if (input) input.blur();
             
             if (!isMulti) {
                 // For single choice: clear all and select this one
@@ -1546,6 +1593,9 @@
             const input = document.querySelector(`input[value="${letter}"]`);
             if (!input) return;
             
+            // Remove focus from any active element to prevent sticky highlight on touch devices
+            if (document.activeElement) document.activeElement.blur();
+            
             if (!isMulti) {
                 // For single choice: select this option
                 selectedAnswers = [letter];
@@ -1569,9 +1619,19 @@
         
         function updateOptionStyles() {
             const options = document.querySelectorAll('.option');
+            const inputs = document.querySelectorAll('input[name="answer"]');
+            
             options.forEach((opt, i) => {
                 const optLetter = examSession.getCurrentQuestion().options[i].letter;
-                opt.classList.toggle('selected', selectedAnswers.includes(optLetter));
+                const isSelected = selectedAnswers.includes(optLetter);
+                
+                // Update the option div's selected class
+                opt.classList.toggle('selected', isSelected);
+                
+                // Ensure the input checked state matches selectedAnswers
+                if (inputs[i]) {
+                    inputs[i].checked = isSelected;
+                }
             });
         }
 
