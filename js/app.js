@@ -39,7 +39,7 @@ function cacheElements() {
         questionText: document.getElementById('question-text'),
         options: document.getElementById('options'),
         feedback: document.getElementById('feedback'),
-        prevBtn: document.getElementById('prev-btn'),
+
         submitBtn: document.getElementById('submit-btn'),
         nextBtn: document.getElementById('next-btn'),
         finishBtn: document.getElementById('finish-btn'),
@@ -680,8 +680,6 @@ function renderQuestion() {
         elements.feedback.classList.add('hidden');
     }
     
-    elements.prevBtn.disabled = index === 0;
-    elements.prevBtn.style.visibility = index === 0 ? 'hidden' : 'visible';
     elements.submitBtn.classList.toggle('hidden', isAnswered);
     elements.nextBtn.classList.toggle('hidden', !isAnswered || index === total - 1);
     elements.finishBtn.classList.toggle('hidden', !isAnswered || index !== total - 1);
