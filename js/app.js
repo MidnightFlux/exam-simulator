@@ -912,19 +912,24 @@ function showReviewDetail(q, result, userAnswer, displayNumber) {
     const optionsHtml = q.options.map(opt => {
         const isCorrect = q.correct_answers.includes(opt.letter);
         const isSelected = (userAnswer || []).includes(opt.letter);
-        let style = 'padding: 10px; margin: 5px 0; border-radius: 6px; border: 2px solid #e0e0e0;';
+        let optionClass = 'option';
         let icon = '';
         
         if (isCorrect) {
-            style = 'padding: 10px; margin: 5px 0; border-radius: 6px; border: 2px solid #4caf50; background: #e8f5e9;';
+            optionClass += ' correct';
             icon = ' ✓';
         } else if (isSelected && !isCorrect) {
-            style = 'padding: 10px; margin: 5px 0; border-radius: 6px; border: 2px solid #f44336; background: #ffebee;';
+            optionClass += ' incorrect';
             icon = ' ✗';
         }
         
-        return `<div style="${style}">
-            <strong>${opt.letter})</strong> ${opt.text}${icon}
+        return `<div class="${optionClass} disabled" style="pointer-events: none; margin-bottom: 12px;">
+            <label class="option-content">
+                <input type="${q.correct_answers.length > 1 ? 'checkbox' : 'radio'}" 
+                       ${isSelected ? 'checked' : ''} disabled>
+                <span class="option-label">${opt.letter})</span>
+                <span class="option-text">${opt.text}${icon}</span>
+            </label>
         </div>`;
     }).join('');
     
