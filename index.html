@@ -1801,6 +1801,10 @@
             
             container.innerHTML = '';
             
+            // Track the currently reviewed question index for highlighting
+            window.currentReviewIndex = displayNumber - 1;
+            refreshSummaryGrid();
+            
             const isMarked = examSession.isMarked(q.question_number);
             
             window.currentReviewQuestionNumber = q.question_number;
@@ -1896,8 +1900,13 @@
             examSession.questions.forEach((q, i) => {
                 const result = examSession.results[q.question_number];
                 const isMarked = examSession.isMarked(q.question_number);
+                const isCurrent = window.currentReviewIndex === i;
                 const dot = document.createElement('div');
-                dot.className = 'question-dot ' + (result === undefined ? 'unanswered' : (result ? 'correct' : 'incorrect'));
+                let className = 'question-dot ' + (result === undefined ? 'unanswered' : (result ? 'correct' : 'incorrect'));
+                if (isCurrent) {
+                    className += ' current';
+                }
+                dot.className = className;
                 dot.textContent = i + 1;
                 dot.title = isMarked ? 'Marked for review' : (result === undefined ? 'Unanswered' : (result ? 'Correct' : 'Incorrect'));
                 dot.onclick = ((idx) => () => {
