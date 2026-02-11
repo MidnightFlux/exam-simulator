@@ -1,4 +1,4 @@
-import { ExamSession } from './exam-session.js';
+import { ExamSession } from './exam-session.js?v=1';
 
 // ==================== Constants ====================
 const STORAGE_KEY = 'exam-simulator-progress';
