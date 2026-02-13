@@ -1,4 +1,4 @@
-import { ExamSession } from './exam-session.js?v=2';
+import { ExamSession } from './exam-session.js?v=3';
 
 // ==================== Constants ====================
 const STORAGE_KEY = 'exam-simulator-progress';
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function loadDefaultQuestions() {
     try {
-        const response = await fetch('sample-questions/ai-102-full.json');
+        const response = await fetch('sample-questions/ai-102-20160209.json');
         if (!response.ok) {
             throw new Error('Failed to load default questions');
         }
@@ -90,7 +90,7 @@ async function loadDefaultQuestions() {
         }
         
         uploadedFileData = {
-            file: { name: 'ai-102-full.json' },
+            file: { name: 'ai-102-20160209.json' },
             questions: questions,
             totalCount: questions.length
         };
