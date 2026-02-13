@@ -524,7 +524,9 @@
       }
     ],
     "correct_answers": [
-      "a"
+      "a",
+      "c",
+      "d"
     ],
     "explanation": "You can extract tables from document images by using the Azure Document Intelligence layout model without any model training by invoking it through supported access methods, including a client library SDK, the REST API, or the Document Intelligence Studio. The client library SDK and REST API allow you to programmatically call the prebuilt layout model (modelId = prebuilt-layout) to extract tables and structural information from JPEG, PNG, and TIFF files, while Document Intelligence Studio provides a no-code, graphical experience to upload documents and run the same layout model interactively. A prebuilt model itself is not a method of extraction but rather the type of model being used, so it does not represent a complete solution on its own.  \r\n\r\nWhat is Azure Document Intelligence?\r\n\r\nUse the Azure Document Intelligence Studio\r\n\r\nRetrieval-Augmented Generation with Azure Document Intelligence in Foundry Tools",
     "references": [
@@ -1120,7 +1122,9 @@
       }
     ],
     "correct_answers": [
-      "a"
+      "a",
+      "b",
+      "d"
     ],
     "explanation": "The appropriate use cases are those where AI agents support low-risk, assistive, and productivity-focused scenarios with clear human oversight and alignment to Microsoft Responsible AI principles. Using an agent to categorize and route city service requests, summarize internal operational information for onboarding, or responsibly recommend products to customers are all explainable, auditable tasks that augment human decision-making without replacing regulated professional judgment. In contrast, deploying an agent to perform legal risk analysis or to diagnose patients and prescribe medication involves high-risk, regulated domains that require licensed professionals and accountability, making them inappropriate and noncompliant with Responsible AI requirements for safety, reliability, and fairness.  \r\n\r\nUnderstand the Azure AI Agent Service\r\n\r\nIntroduction\r\n\r\nIntroduction\r\n\r\nMicrosoft Foundry Agent Service\r\n\r\nBuild agents, your way\r\n\r\nBuild agents, your way",
     "references": [
@@ -3213,7 +3217,9 @@
       }
     ],
     "correct_answers": [
-      "a"
+      "a",
+      "b",
+      "c"
     ],
     "explanation": "When creating an agent by using the Microsoft Foundry Agent Service, you must specify the agent name, the model deployment, and the instructions in the agent configuration because these elements define the agent’s identity, the foundation model it uses, and how it behaves when applying grounded prompts and contextual data, including documenting sources. Tools are optional and only required when the agent must call external capabilities, and a YAML file itself is not a configuration element but merely one possible format used to define the agent. Therefore, specifying instructions, model deployment, and name is required to successfully create the agent using the Agent Service.  \r\n\r\nIntroduction\r\n\r\nHow to use Microsoft Foundry Agent Service\r\n\r\nMicrosoft Foundry Agent Service\r\n\r\nDevelop AI agents in Visual Studio Code",
     "references": [
