@@ -515,12 +515,12 @@
       {
         "letter": "c",
         "text": "a REST API",
-        "is_correct": false
+        "is_correct": true
       },
       {
         "letter": "d",
         "text": "the Document Intelligence Studio",
-        "is_correct": false
+        "is_correct": true
       }
     ],
     "correct_answers": [
@@ -1101,7 +1101,7 @@
       {
         "letter": "b",
         "text": "A hospital administrative assistant deploys an agent to collate standard operational procedures, staff directories, and shift policies into concise orientations for new nurses.",
-        "is_correct": false
+        "is_correct": true
       },
       {
         "letter": "c",
@@ -1111,7 +1111,7 @@
       {
         "letter": "d",
         "text": "A local boutique owner deploys an agent that recommends gift options based on a customer’s stated needs and past purchases, guiding shoppers responsibly through complex product catalogs.",
-        "is_correct": false
+        "is_correct": true
       },
       {
         "letter": "e",
@@ -3194,12 +3194,12 @@
       {
         "letter": "b",
         "text": "model deployment",
-        "is_correct": false
+        "is_correct": true
       },
       {
         "letter": "c",
         "text": "name",
-        "is_correct": false
+        "is_correct": true
       },
       {
         "letter": "d",
