@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function loadDefaultQuestions() {
     try {
-        const response = await fetch('sample-questions/ai-102-20160209.json');
+        const response = await fetch('sample-questions/ai-102-20160209.json?v=3');
         if (!response.ok) {
             throw new Error('Failed to load default questions');
         }
