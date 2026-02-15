@@ -1,4 +1,4 @@
-import { ExamSession } from './exam-session.js?v=3';
+import { ExamSession } from './exam-session.js?v=4';
 
 // ==================== Constants ====================
 const STORAGE_KEY = 'exam-simulator-progress';
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function loadDefaultQuestions() {
     try {
-        const response = await fetch('sample-questions/ai-102-20160209.json?v=3');
+        const response = await fetch('sample-questions/ai-102-20160209.json?v=4');
         if (!response.ok) {
             throw new Error('Failed to load default questions');
         }
