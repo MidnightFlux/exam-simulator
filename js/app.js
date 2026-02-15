@@ -957,6 +957,9 @@ function showReviewDetail(q, result, userAnswer, displayNumber) {
         ` : ''}
     `;
     elements.reviewDetails.appendChild(div);
+    
+    // Scroll to review details
+    elements.reviewDetails.scrollIntoView({ behavior: 'auto', block: 'start' });
 }
 
 function updateSummaryMarkButton(isMarked) {
