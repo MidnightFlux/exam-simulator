@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function loadDefaultQuestions() {
     try {
-        const response = await fetch('sample-questions/ai-102-20160209.json?v=4');
+        const response = await fetch('sample-questions/ai-102-20260209.json?v=4');
         if (!response.ok) {
             throw new Error('Failed to load default questions');
         }
@@ -90,7 +90,7 @@ async function loadDefaultQuestions() {
         }
         
         uploadedFileData = {
-            file: { name: 'ai-102-20160209.json' },
+            file: { name: 'ai-102-20260209.json' },
             questions: questions,
             totalCount: questions.length
         };
